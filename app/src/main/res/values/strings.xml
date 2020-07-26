@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">VJetGroupTestApp</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="sort_by">Sort by</string>
+    <string name="filter_by">Filter by</string>
+    <string name="date_from">Date from:</string>
+    <string name="date_to">Date to:</string>
+    <string name="apply_filter">Apply filter</string>
+    <string name="clear_filter">Clear filter</string>
+    <string name="error_no_network">No internet</string>
+    <string name="share_news_title">Share feed</string>
+
+</resources>

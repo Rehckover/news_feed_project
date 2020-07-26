@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation_main"
+    app:startDestination="@id/feedsListFragment">
+
+    <fragment
+        android:id="@+id/feedsListFragment"
+        android:name="com.example.vjetgrouptestapp.ui.feeds.list.FeedsFragment"
+        android:label="fragment_feeds_list"
+        tools:layout="@layout/fragment_feeds_list" >
+        <action
+            android:id="@+id/action_feedsListFragment_to_favouriteFeedsFragment"
+            app:destination="@id/favouriteFeedsFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/favouriteFeedsFragment"
+        android:name="com.example.vjetgrouptestapp.ui.feeds.favourite.FavouriteFeedsFragment"
+        android:label="FavouriteFeedsFragment" />
+</navigation>
