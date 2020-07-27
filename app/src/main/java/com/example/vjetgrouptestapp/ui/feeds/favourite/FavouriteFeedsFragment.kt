@@ -15,7 +15,7 @@ import kotlinx.android.synthetic.main.fragment_feeds_favourite.*
 @AndroidEntryPoint
 class FavouriteFeedsFragment : BaseFragment<FavouriteFeedsViewModel>() {
 
-    lateinit var feedsRvAdapter: FeedsRvAdapter
+    private lateinit var feedsRvAdapter: FeedsRvAdapter
 
     override fun viewModelClass() = FavouriteFeedsViewModel::class.java
 
@@ -33,7 +33,7 @@ class FavouriteFeedsFragment : BaseFragment<FavouriteFeedsViewModel>() {
         setupFeedFavAdapter()
     }
 
-    fun setupFeedFavAdapter() {
+    private fun setupFeedFavAdapter() {
         feedsRvAdapter =
             FeedsRvAdapter(
                 listener = object :
@@ -47,7 +47,7 @@ class FavouriteFeedsFragment : BaseFragment<FavouriteFeedsViewModel>() {
                     }
 
                     override fun onDownLoadClick(feedModel: FeedModel?) {
-                        DownloadHelper.downloadImageByUrl(requireContext(),feedModel?.url)
+                        DownloadHelper.downloadImageByUrl(requireContext(),feedModel?.urlToImage)
                     }
                 })
         rv_feeds.adapter = feedsRvAdapter

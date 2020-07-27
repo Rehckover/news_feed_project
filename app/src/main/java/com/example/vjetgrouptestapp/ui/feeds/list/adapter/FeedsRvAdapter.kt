@@ -3,18 +3,18 @@ package com.example.vjetgrouptestapp.ui.feeds.list.adapter
 import androidx.annotation.LayoutRes
 import androidx.recyclerview.widget.DiffUtil
 import com.example.vjetgrouptestapp.R
-import com.example.vjetgrouptestapp.base.arch.BaseListAdapter
+import com.example.vjetgrouptestapp.base.arch.BasePagedListAdapter
 import com.example.vjetgrouptestapp.base.remote.models.FeedModel
 
 
 class FeedsRvAdapter(
     @LayoutRes private val itemRes: Int = R.layout.item_feed,
     listener: FeedsAdapterListener<FeedModel>
-) : BaseListAdapter<FeedItemState, FeedModel>(DIFF_CALLBACK, listener) {
+) : BasePagedListAdapter<FeedItemState, FeedModel>(DIFF_CALLBACK, listener) {
 
     override fun itemState(
         item: FeedModel,
-        listener: BaseListAdapter.Listener<FeedModel>,
+        listener: Listener<FeedModel>,
         position: Int
     ) = FeedItemState(item, listener as FeedsAdapterListener<FeedModel>)
 

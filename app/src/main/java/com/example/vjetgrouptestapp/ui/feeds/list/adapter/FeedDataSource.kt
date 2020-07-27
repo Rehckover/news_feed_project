@@ -5,6 +5,7 @@ import androidx.paging.PageKeyedDataSource
 import com.example.vjetgrouptestapp.base.db.LocalRepository
 import com.example.vjetgrouptestapp.base.remote.RemoteRepository
 import com.example.vjetgrouptestapp.base.remote.RemoteSettings
+import com.example.vjetgrouptestapp.base.remote.models.Result
 import com.example.vjetgrouptestapp.base.remote.models.FeedModel
 import com.example.vjetgrouptestapp.ui.feeds.list.SearchOptions
 import kotlinx.coroutines.CoroutineScope
@@ -27,63 +28,54 @@ class FeedDataSource(
     ) {
         Log.d(TAG, "loadInitial: size ${params.requestedLoadSize}")
         scope.launch {
-            try {
-                val dbListOfFeedsIds = localRepository.getFeedsIds()
-                val response = remoteRepository.getFeeds(
-                    apiKey = RemoteSettings.API_KEY,
-                    pageSize = params.requestedLoadSize,
-                    page = INITIAL_PAGE_KEY,
-                    sources = searchOptions?.source,
-                    dateTo = searchOptions?.dateTo,
-                    dateFrom = searchOptions?.dateFrom,
-                    sortBy = searchOptions?.sortBy?.sortValue
-                ).await()
-                attachFavouriteStateFromDb(dbListOfFeedsIds, response.articles)
-                when {
-                    response.isSuccessful() -> {
-                        val listing = response.articles
-                        callback.onResult(
-                            listing ?: listOf(), null,
-                            INITIAL_PAGE_KEY.plus(1)
-                        )
-                    }
+            val dbListOfFeedsIds = localRepository.getFeedsIds()
+            val resultFeeds = remoteRepository.getFeeds(
+                apiKey = RemoteSettings.API_KEY,
+                pageSize = params.requestedLoadSize,
+                page = INITIAL_PAGE_KEY,
+                sources = searchOptions?.source,
+                dateTo = searchOptions?.dateTo,
+                dateFrom = searchOptions?.dateFrom,
+                sortBy = searchOptions?.sortBy?.sortValue
+            )
+            when (resultFeeds) {
+                is Result.Success -> {
+                    attachFavouriteStateFromDb(dbListOfFeedsIds, resultFeeds.data)
+                    callback.onResult(
+                        resultFeeds.data, null,
+                        INITIAL_PAGE_KEY.plus(1)
+                    )
                 }
-
-            } catch (exception: Exception) {
-
             }
+
         }
     }
 
     override fun loadAfter(params: LoadParams<Int>, callback: LoadCallback<Int, FeedModel>) {
         Log.d(TAG, "loadAfter: size ${params.requestedLoadSize} params ${params.key}")
         scope.launch {
-            try {
-                val dbListOfFeedsIds = localRepository.getFeedsIds()
-                val response = remoteRepository.getFeeds(
-                    apiKey = RemoteSettings.API_KEY,
-                    pageSize = params.requestedLoadSize,
-                    page = params.key,
-                    sources = searchOptions?.source,
-                    dateTo = searchOptions?.dateTo,
-                    dateFrom = searchOptions?.dateFrom,
-                    sortBy = searchOptions?.sortBy?.sortValue
-                ).await()
-                attachFavouriteStateFromDb(dbListOfFeedsIds, response.articles)
-                when {
-                    response.isSuccessful() -> {
-                        val listing = response.articles
-                        callback.onResult(listing, params.key.plus(1))
-                    }
+            val dbListOfFeedsIds = localRepository.getFeedsIds()
+            val resultFeeds = remoteRepository.getFeeds(
+                apiKey = RemoteSettings.API_KEY,
+                pageSize = params.requestedLoadSize,
+                page = INITIAL_PAGE_KEY,
+                sources = searchOptions?.source,
+                dateTo = searchOptions?.dateTo,
+                dateFrom = searchOptions?.dateFrom,
+                sortBy = searchOptions?.sortBy?.sortValue
+            )
+            when (resultFeeds) {
+                is Result.Success -> {
+                    attachFavouriteStateFromDb(dbListOfFeedsIds, resultFeeds.data)
+                    callback.onResult(
+                        resultFeeds.data, INITIAL_PAGE_KEY.plus(1)
+                    )
                 }
-
-            } catch (exception: Exception) {
-
             }
         }
     }
 
-    fun attachFavouriteStateFromDb(listOfIds: List<String>, listOfFeedModel: List<FeedModel?>?) {
+    private fun attachFavouriteStateFromDb(listOfIds: List<String>, listOfFeedModel: List<FeedModel?>?) {
         listOfFeedModel?.forEach { feedModel ->
             if (listOfIds.any { it == feedModel?.title })
                 feedModel?.isFavourite = true

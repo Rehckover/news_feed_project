@@ -1,16 +1,19 @@
 package com.example.vjetgrouptestapp.base.remote
 
-import com.example.corutinepro.com.car.forme.repository.api.Api
-import com.example.vjetgrouptestapp.base.remote.models.FeedResponse
-import com.example.vjetgrouptestapp.base.remote.models.SourcesResponse
-import kotlinx.coroutines.Deferred
+import com.example.vjetgrouptestapp.base.arch.GeneralErrorHandle
+import com.example.vjetgrouptestapp.base.remote.models.FeedModel
+import com.example.vjetgrouptestapp.base.remote.models.Result
+import com.example.vjetgrouptestapp.base.remote.models.SourceModel
 import retrofit2.Retrofit
 
-class RemoteRepository(retrofit: Retrofit) : Api {
+class RemoteRepository(
+    retrofit: Retrofit,
+    private val generalErrorHandle: GeneralErrorHandle
+) {
 
-    val api = retrofit.create(Api::class.java)
+    private val api: Api = retrofit.create(Api::class.java)
 
-    override fun getFeeds(
+    suspend fun getFeeds(
         apiKey: String,
         pageSize: Int,
         page: Int,
@@ -18,11 +21,29 @@ class RemoteRepository(retrofit: Retrofit) : Api {
         dateFrom: String?,
         dateTo: String?,
         sortBy: String?
-    ): Deferred<FeedResponse> =
-        api.getFeeds(apiKey, pageSize, page, sources, dateFrom, dateTo, sortBy)
+    ): Result<List<FeedModel>> = try {
+        val feedResponse = api.getFeeds(
+            apiKey = apiKey,
+            pageSize = pageSize,
+            page = page,
+            sources = sources,
+            dateFrom = dateFrom,
+            dateTo = dateTo,
+            sortBy = sortBy
+        ).await()
+        Result.Success(feedResponse.articles)
+    } catch (throwable: Throwable) {
+        Result.Error(generalErrorHandle.getError(throwable))
+    }
 
-    override fun getSources(apiKey: String): Deferred<SourcesResponse> =
-        api.getSources(apiKey)
+    suspend fun getSources(apiKey: String): Result<List<SourceModel>> = try {
+        val sourcesResponse = api.getSources(
+            apiKey = apiKey
+        ).await()
+        Result.Success(sourcesResponse.sources)
+    } catch (throwable: Throwable) {
+        Result.Error(generalErrorHandle.getError(throwable))
+    }
 
 
 }

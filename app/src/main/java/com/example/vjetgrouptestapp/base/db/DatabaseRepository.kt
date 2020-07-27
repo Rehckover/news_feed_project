@@ -10,7 +10,7 @@ interface DatabaseRepository {
 
     suspend fun deleteFeed(feedModel: FeedModel)
 
-    fun getFeeds(): DataSource.Factory<Int, FeedModel>
+    fun getFeeds(): DataSource.Factory<Int, FeedModel>?
 
     fun getFeedsIds(): List<String>
 }

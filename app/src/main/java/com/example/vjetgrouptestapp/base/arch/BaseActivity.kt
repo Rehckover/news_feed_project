@@ -11,9 +11,6 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.vjetgrouptestapp.BR
 import com.example.vjetgrouptestapp.R
 import com.example.vjetgrouptestapp.base.extensions.toast
-import dagger.hilt.android.AndroidEntryPoint
-import digital.cvlt.app.core.platform.BaseViewModel
-import javax.inject.Inject
 
 abstract class BaseActivity<V : BaseViewModel, B : ViewDataBinding>
     : AppCompatActivity() {

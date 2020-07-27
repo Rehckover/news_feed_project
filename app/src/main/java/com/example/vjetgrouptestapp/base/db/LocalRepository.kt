@@ -4,7 +4,7 @@ import androidx.paging.DataSource
 import com.example.vjetgrouptestapp.base.remote.models.FeedModel
 
 
-class LocalRepository(val databaseDao: DatabaseDao) : DatabaseRepository {
+class LocalRepository(private val databaseDao: DatabaseDao) : DatabaseRepository {
 
     override suspend fun saveFeed(feedModel: FeedModel) =
         databaseDao.saveFeed(feedModel)

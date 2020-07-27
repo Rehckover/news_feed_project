@@ -5,15 +5,16 @@ import android.util.Log
 import androidx.hilt.lifecycle.ViewModelInject
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
-import com.example.vjetgrouptestapp.base.utils.CombinedLiveData
 import com.example.vjetgrouptestapp.base.db.LocalRepository
 import com.example.vjetgrouptestapp.base.remote.RemoteRepository
 import com.example.vjetgrouptestapp.base.remote.RemoteSettings
 import com.example.vjetgrouptestapp.base.remote.models.FeedModel
+import com.example.vjetgrouptestapp.base.remote.models.Result
 import com.example.vjetgrouptestapp.base.remote.models.SourceModel
+import com.example.vjetgrouptestapp.base.utils.CombinedLiveData
 import com.example.vjetgrouptestapp.base.utils.DATE_FORMAT
-import com.example.vjetgrouptestapp.ui.feeds.list.FeedPagingFactory
-import digital.cvlt.app.core.platform.BaseViewModel
+import com.example.vjetgrouptestapp.base.arch.BaseViewModel
+import com.example.vjetgrouptestapp.base.remote.models.ErrorEntity
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.*
@@ -22,7 +23,7 @@ const val DEFAULT_SOURCE = "reddit-r-all"
 const val TAG = "FeedsViewModel"
 
 class FeedsViewModel @ViewModelInject constructor(
-    val remoteRepository: RemoteRepository,
+    private val remoteRepository: RemoteRepository,
     val localRepository: LocalRepository,
     feedPagingFactory: FeedPagingFactory
 ) : BaseViewModel() {
@@ -41,29 +42,32 @@ class FeedsViewModel @ViewModelInject constructor(
     }
 
     fun getSources() {
-        try {
-            viewModelScope.launch {
-                val sourceResponse = remoteRepository
-                    .getSources(RemoteSettings.API_KEY)
-                    .await()
-                sources.value = sourceResponse.sources
-                if (sourceResponse.isSuccessful()) {
+        if (sources.value != null) {
+            updateSearchOptions()
+            return
+        }
+        viewModelScope.launch {
+            val sourcesResult = remoteRepository
+                .getSources(RemoteSettings.API_KEY)
+            when (sourcesResult) {
+                is Result.Success -> {
+                    this@FeedsViewModel.sources.value = sourcesResult.data
                     updateSearchOptions()
                 }
+                is Result.Error -> {
+                    handleErrors(sourcesResult)
+                }
             }
-        } catch (e: Exception) {
-            handleException(e)
         }
-
     }
 
-    fun getDefaultSearchOptions() = SearchOptions(
+    private fun getDefaultSearchOptions() = SearchOptions(
         source = sources.value?.firstOrNull()?.id ?: DEFAULT_SOURCE,
         dateFrom = getInitialDateFrom(),
         dateTo = getInitialDateTo()
     )
 
-    fun createOrResetSearchOptions(forceReset: Boolean = false) {
+    private fun createOrResetSearchOptions(forceReset: Boolean = false) {
         if (tempSearchOptions == null || forceReset)
             tempSearchOptions = getDefaultSearchOptions()
     }
@@ -71,21 +75,15 @@ class FeedsViewModel @ViewModelInject constructor(
     fun handleFavClick(feedModel: FeedModel?) {
         if (feedModel == null) return
         viewModelScope.launch {
-            Log.d(TAG, "saveFeedModel: ")
             try {
                 if (feedModel.isFavourite)
                     localRepository.saveFeed(feedModel)
                 else
                     localRepository.deleteFeed(feedModel)
             } catch (e: Exception) {
-                handleException(e)
+                handleErrors(Result.Error(ErrorEntity.DbException(e.localizedMessage)))
             }
         }
-    }
-
-    fun handleException(e: Exception) {
-        Log.d(TAG, "handleException: ${e.localizedMessage}")
-        e.printStackTrace()
     }
 
     @SuppressLint("SimpleDateFormat")

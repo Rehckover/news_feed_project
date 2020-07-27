@@ -7,7 +7,8 @@ import com.example.vjetgrouptestapp.base.db.AppDatabase
 import com.example.vjetgrouptestapp.base.db.DatabaseDao
 import com.example.vjetgrouptestapp.base.db.DbSettings
 import com.example.vjetgrouptestapp.base.db.LocalRepository
-import com.example.vjetgrouptestapp.base.remote.HeaderInterceptor
+import com.example.vjetgrouptestapp.base.arch.GeneralErrorHandle
+import com.example.vjetgrouptestapp.base.remote.interceptors.HeaderInterceptor
 import com.example.vjetgrouptestapp.base.remote.RemoteRepository
 import com.example.vjetgrouptestapp.base.remote.RemoteSettings
 import com.example.vjetgrouptestapp.ui.feeds.list.FeedPagingFactory
@@ -43,8 +44,8 @@ class ApplicationModule {
 
     @Provides
     @Singleton
-    fun provideRemoteRepository(retrofit: Retrofit): RemoteRepository {
-        return RemoteRepository(retrofit)
+    fun provideRemoteRepository(retrofit: Retrofit,generalErrorHandle: GeneralErrorHandle): RemoteRepository {
+        return RemoteRepository(retrofit,generalErrorHandle)
     }
 
     @Provides
@@ -95,5 +96,11 @@ class ApplicationModule {
             okHttpClientBuilder.addInterceptor(logInterceptor)
         }
         return okHttpClientBuilder.build()
+    }
+
+    @Provides
+    @Singleton
+    fun createGeneralErrorHandler(): GeneralErrorHandle {
+        return GeneralErrorHandle()
     }
 }

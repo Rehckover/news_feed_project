@@ -12,12 +12,8 @@ class App : Application() {
         instance = this
     }
 
-    override fun onCreate() {
-        super.onCreate()
-    }
-
     companion object {
-        public var instance: App? = null
+        var instance: App? = null
 
         fun applicationContext(): Context {
             return instance!!.applicationContext

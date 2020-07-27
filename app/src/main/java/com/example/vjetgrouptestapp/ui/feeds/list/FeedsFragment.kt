@@ -2,6 +2,7 @@ package com.example.vjetgrouptestapp.ui.feeds.list
 
 import android.Manifest
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.View
@@ -22,11 +23,8 @@ import com.example.vjetgrouptestapp.ui.feeds.list.adapter.FeedsRvAdapter
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
-import com.karumi.dexter.listener.PermissionDeniedResponse
-import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import com.karumi.dexter.listener.single.PermissionListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feeds_list.*
 import java.text.SimpleDateFormat
@@ -39,7 +37,7 @@ const val WIDTH = 100
 @AndroidEntryPoint
 class FeedsFragment : BaseFragment<FeedsViewModel>() {
 
-    lateinit var feedsRvAdapter: FeedsRvAdapter
+    private lateinit var feedsRvAdapter: FeedsRvAdapter
 
     override fun layoutResId(): Int = R.layout.fragment_feeds_list
 
@@ -67,7 +65,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         setupInitialRequest()
     }
 
-    fun setupInitialRequest() {
+    private fun setupInitialRequest() {
         if (viewModel.tempSearchOptions != null) {
             resumeFilterState()
         } else {
@@ -75,7 +73,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun setupFeedsAdapter() {
+    private fun setupFeedsAdapter() {
         feedsRvAdapter =
             FeedsRvAdapter(
                 listener = object :
@@ -95,9 +93,9 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         rv_feeds.adapter = feedsRvAdapter
     }
 
-    fun setupApplyAndClearBtns() {
+    private fun setupApplyAndClearBtns() {
         btn_apply.setOnClickListener {
-            viewModel.updateSearchOptions()
+            viewModel.getSources()
         }
         btn_reset.setOnClickListener {
             resetFilter()
@@ -105,7 +103,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun setupSourceAdapter(listOfSources: List<SourceModel>) {
+    private fun setupSourceAdapter(listOfSources: List<SourceModel>) {
         sources_spinner.minValue = 0
         sources_spinner.maxValue = listOfSources.size - 1
         sources_spinner.displayedValues = listOfSources.map { it.name }.toTypedArray()
@@ -114,7 +112,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun setupSearch() {
+    private fun setupSearch() {
         btn_search.isSelected = false
         btn_search.setOnClickListener {
             btn_search.isSelected = !btn_search.isSelected
@@ -126,14 +124,14 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun setupFavBtn() {
+    private fun setupFavBtn() {
         btn_fav.setOnClickListener {
             val action = FeedsFragmentDirections.actionFeedsListFragmentToFavouriteFeedsFragment()
             findNavController().navigate(action)
         }
     }
 
-    fun setupDates() {
+    private fun setupDates() {
         tv_date_from.text = viewModel.getInitialDateFrom()
         tv_date_to.text = viewModel.getInitialDateTo()
         setupDateListener(tv_date_from) {
@@ -144,14 +142,14 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun setupDateListener(dateView: AppCompatTextView, block: (String) -> (Unit)) {
+    private fun setupDateListener(dateView: AppCompatTextView, block: (String) -> (Unit)) {
         dateView.setOnClickListener {
             DialogHelper.setDate(
                 requireContext(),
                 DatePickerDialog.OnDateSetListener { view, year, month, day ->
                     val calendar = Calendar.getInstance()
                     calendar.set(year, month, day)
-                    val date = SimpleDateFormat(DATE_FORMAT).format(calendar.time)
+                    val date = SimpleDateFormat(DATE_FORMAT,Locale.ENGLISH).format(calendar.time)
                     dateView.text = date
                     block.invoke(date)
                 }
@@ -159,7 +157,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun setupSortBy() {
+    private fun setupSortBy() {
         btn_sort_date.isSelected = true
         btn_sort_date.setOnClickListener {
             if (it?.isSelected.falseIfNull()) return@setOnClickListener
@@ -175,7 +173,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         }
     }
 
-    fun resumeFilterState() {
+    private fun resumeFilterState() {
         val searchOptions = viewModel.searchOptions.value
         val sources = viewModel.sources.value
         tv_date_from.text = searchOptions?.dateFrom
@@ -185,7 +183,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         btn_sort_popularity.isSelected = searchOptions?.sortBy == SortByType.POPULARITY
     }
 
-    fun resetFilter() {
+    private fun resetFilter() {
         tv_date_from.text = viewModel.getInitialDateFrom()
         tv_date_to.text = viewModel.getInitialDateTo()
         sources_spinner.value = 0
@@ -206,23 +204,19 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
                 override fun onPermissionRationaleShouldBeShown(
                     permissions: MutableList<PermissionRequest>?,
                     token: PermissionToken?
-                ) {
-
-                }
-
-
+                ) {}
             })
             .check()
     }
 
-    fun setLayoutWidthAndHeight(containerElement: View, width: Int, height: Int) {
+    private fun setLayoutWidthAndHeight(containerElement: View, width: Int, height: Int) {
         val layoutParams = containerElement.layoutParams
         layoutParams.width = width
         layoutParams.height = height
         containerElement.layoutParams = layoutParams
     }
 
-    fun startExpandAnimation(containerElement: View) {
+    private fun startExpandAnimation(containerElement: View) {
         val animator = ValueAnimator.ofFloat(0f, 100f)
         animator.addUpdateListener { valueAnimator ->
             val x = valueAnimator.animatedValue as Float
@@ -233,7 +227,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         animator.start()
     }
 
-    fun startCollapseAnimation(containerElement: View) {
+    private fun startCollapseAnimation(containerElement: View) {
         val animator = ValueAnimator.ofFloat(100f, 0f)
         animator.addUpdateListener { valueAnimator ->
             val x = valueAnimator.animatedValue as Float

@@ -12,7 +12,7 @@ open class BaseViewHolder<in S : BaseItemState, I : Any>(
     val binding: ViewDataBinding
 ) : RecyclerView.ViewHolder(binding.root), LifecycleOwner {
 
-    protected val lifecycleRegistry by lazy { LifecycleRegistry(this) }
+    private val lifecycleRegistry by lazy { LifecycleRegistry(this) }
 
     init {
         lifecycleRegistry.currentState = Lifecycle.State.INITIALIZED
@@ -31,6 +31,4 @@ open class BaseViewHolder<in S : BaseItemState, I : Any>(
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
     }
 
-    open fun onViewAttachedToWindow() = Unit
-    open fun onViewDetachedFromWindow() = Unit
 }

@@ -8,7 +8,7 @@ import androidx.databinding.ViewDataBinding
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 
-abstract class BaseListAdapter<S : BaseItemState, I : Any>(
+abstract class BasePagedListAdapter<S : BaseItemState, I : Any>(
     diffUtilItemCallback: DiffUtil.ItemCallback<I>,
     var listener: Listener<I>
 ) : PagedListAdapter<I, BaseViewHolder<S, I>>(diffUtilItemCallback) {

@@ -1,7 +1,6 @@
-package com.example.corutinepro.com.car.forme.repository.api
+package com.example.vjetgrouptestapp.base.remote
 
 import com.example.vjetgrouptestapp.base.remote.models.FeedResponse
-import com.example.vjetgrouptestapp.base.remote.models.SourceModel
 import com.example.vjetgrouptestapp.base.remote.models.SourcesResponse
 import kotlinx.coroutines.Deferred
 import retrofit2.http.GET

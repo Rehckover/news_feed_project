@@ -10,7 +10,6 @@ import androidx.databinding.ViewDataBinding
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.vjetgrouptestapp.BR
-import digital.cvlt.app.core.platform.BaseViewModel
 
 
 abstract class BaseFragment<V : BaseViewModel>

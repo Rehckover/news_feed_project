@@ -6,16 +6,16 @@ import android.net.Uri
 import android.os.Environment
 import com.example.vjetgrouptestapp.base.db.DbSettings
 import com.example.vjetgrouptestapp.base.extensions.getDownloadManager
+import com.example.vjetgrouptestapp.base.extensions.isEmptyOrNull
 import java.io.File
 
 
 object DownloadHelper {
 
     fun downloadImageByUrl(context: Context, url: String?) {
-        if (url == null) return
-        var fileName = url.substring(url.lastIndexOf('/') + 1)
-        fileName = fileName.substring(0, 1).toUpperCase() + fileName.substring(1)
-        val downloadUri: Uri = Uri.parse(url)
+        if (url.isEmptyOrNull()) return
+        val fileName = url!!.substring(url.lastIndexOf('/') + 1)
+        val downloadUri: Uri = Uri.parse(url) ?: return
         val request = DownloadManager.Request(downloadUri)
         request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI or DownloadManager.Request.NETWORK_MOBILE)
             .setAllowedOverRoaming(false)
