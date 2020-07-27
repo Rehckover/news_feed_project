@@ -1,5 +1,6 @@
 package com.example.vjetgrouptestapp.ui.feeds.list
 
+import android.Manifest
 import android.animation.ValueAnimator
 import android.app.DatePickerDialog
 import android.os.Bundle
@@ -15,8 +16,17 @@ import com.example.vjetgrouptestapp.base.remote.models.FeedModel
 import com.example.vjetgrouptestapp.base.remote.models.SourceModel
 import com.example.vjetgrouptestapp.base.utils.DATE_FORMAT
 import com.example.vjetgrouptestapp.base.utils.DialogHelper
+import com.example.vjetgrouptestapp.base.utils.DownloadHelper
 import com.example.vjetgrouptestapp.base.utils.ShareHelper
 import com.example.vjetgrouptestapp.ui.feeds.list.adapter.FeedsRvAdapter
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.karumi.dexter.listener.single.PermissionListener
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.android.synthetic.main.fragment_feeds_list.*
 import java.text.SimpleDateFormat
@@ -79,7 +89,7 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
                     }
 
                     override fun onDownLoadClick(feedModel: FeedModel?) {
-
+                        requestPermissionAndStartDownloading(feedModel)
                     }
                 })
         rv_feeds.adapter = feedsRvAdapter
@@ -181,6 +191,28 @@ class FeedsFragment : BaseFragment<FeedsViewModel>() {
         sources_spinner.value = 0
         btn_sort_date.isSelected = true
         btn_sort_popularity.isSelected = false
+    }
+
+    fun requestPermissionAndStartDownloading(feedModel:FeedModel?){
+        Dexter.withActivity(activity)
+            .withPermissions(listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE,Manifest.permission.READ_EXTERNAL_STORAGE))
+            .withListener(object :MultiplePermissionsListener{
+                override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+                    if (report?.areAllPermissionsGranted().falseIfNull()) {
+                        DownloadHelper.downloadImageByUrl(requireContext(),feedModel?.urlToImage)
+                    }
+                }
+
+                override fun onPermissionRationaleShouldBeShown(
+                    permissions: MutableList<PermissionRequest>?,
+                    token: PermissionToken?
+                ) {
+
+                }
+
+
+            })
+            .check()
     }
 
     fun setLayoutWidthAndHeight(containerElement: View, width: Int, height: Int) {

@@ -6,6 +6,7 @@ import androidx.lifecycle.Observer
 import com.example.vjetgrouptestapp.R
 import com.example.vjetgrouptestapp.base.arch.BaseFragment
 import com.example.vjetgrouptestapp.base.remote.models.FeedModel
+import com.example.vjetgrouptestapp.base.utils.DownloadHelper
 import com.example.vjetgrouptestapp.base.utils.ShareHelper
 import com.example.vjetgrouptestapp.ui.feeds.list.adapter.FeedsRvAdapter
 import dagger.hilt.android.AndroidEntryPoint
@@ -46,7 +47,7 @@ class FavouriteFeedsFragment : BaseFragment<FavouriteFeedsViewModel>() {
                     }
 
                     override fun onDownLoadClick(feedModel: FeedModel?) {
-
+                        DownloadHelper.downloadImageByUrl(requireContext(),feedModel?.url)
                     }
                 })
         rv_feeds.adapter = feedsRvAdapter
